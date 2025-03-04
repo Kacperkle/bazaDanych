@@ -36,9 +36,9 @@ public class baza {
         }
     }
 
-    public static ObservableList<Student> getAllStudents() {
+    public static ObservableList<Student> getAllStudents(String tableName) {
         ObservableList<Student> students = FXCollections.observableArrayList();
-        String query = "SELECT * FROM students";
+        String query = "SELECT * FROM " + tableName;
 
         try (Connection connection = getConnection();
              Statement stmt = connection.createStatement();
@@ -53,8 +53,22 @@ public class baza {
         return students;
     }
 
-    public static void updateStudent(String name, int  age, String grade, int id) {
-        String query = "UPDATE students SET name = ?, age = ?, grade = ? WHERE id = ?";
+    public static void addStudent(String tableName, String name, int age, String grade) {
+        String query = "INSERT INTO " + tableName + " (name, age, grade) VALUES (?, ?, ?)";
+
+        try (Connection connection = getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, name);
+            stmt.setInt(2, age);
+            stmt.setString(3, grade);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void updateStudent(String tableName, String name, int age, String grade, int id) {
+        String query = "UPDATE " + tableName + " SET name = ?, age = ?, grade = ? WHERE id = ?";
 
         try (Connection connection = getConnection();
              PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -68,8 +82,8 @@ public class baza {
         }
     }
 
-    public static void deleteStudent(int id) {
-        String query = "DELETE FROM students WHERE id = ?";
+    public static void deleteStudent(String tableName, int id) {
+        String query = "DELETE FROM " + tableName + " WHERE id = ?";
 
         try (Connection connection = getConnection();
              PreparedStatement stmt = connection.prepareStatement(query)) {
